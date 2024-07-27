@@ -7,7 +7,7 @@ class BusinessRequirements:
     def _transform_requirements(self, user_requirements: UserRequirements) -> str:
         # Here we can transform user input into structured business requirements.
         # For simplicity, let's assume a simple transformation.
-        return user_requirements.description.upper()
+        return user_requirements.description
 
     def update_requirements(self, new_description: str):
         self.requirements = self._transform_requirements(UserRequirements(new_description))

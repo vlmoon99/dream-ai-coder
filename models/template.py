@@ -1,10 +1,12 @@
 from models.environment import Environment
 
 class TemplateStage:
-    def __init__(self, name: str, description: str):
+    def __init__(self, name: str, description: str, system_prompt: str = None, prompt_template: str = None):
         self.name = name
         self.description = description
         self.completed = False
+        self.system_prompt = system_prompt
+        self.prompt_template = prompt_template
 
     def complete_stage(self):
         self.completed = True
