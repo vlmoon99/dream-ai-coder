@@ -9,9 +9,9 @@ class AIGenerationService:
         self.llm_model = GPT4All("Meta-Llama-3-8B-Instruct.Q4_0.gguf",device=list_gpus[0]) 
         print("Create AIGenerationService")
 
-    def generateCode(self,system_prompt : str,prompt_template : str, busines_requirements : BusinessRequirements):
-        with self.llm_model.chat_session(system_prompt=system_prompt,prompt_template = prompt_template):
-            generarted_content = self.llm_model.generate(busines_requirements.requirements, max_tokens=2048)
+    def generateCode(self,prompt : str):
+        with self.llm_model.chat_session():
+            generarted_content = self.llm_model.generate(prompt, max_tokens=2048)
             return generarted_content
 
     def executeCommand(self):

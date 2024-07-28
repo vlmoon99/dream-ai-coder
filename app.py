@@ -5,10 +5,8 @@ from services.ai_generation_service import AIGenerationService
 from flask_injector import FlaskInjector
 
 def create_app() -> Flask:
-    # Create a Flask application
     app = Flask(__name__)
     
-    # Register blueprints for routes
     with app.app_context():
         from routes import bp  # Import the blueprint
         app.register_blueprint(bp)  # Register the blueprint
