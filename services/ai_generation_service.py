@@ -11,8 +11,8 @@ class AIGenerationService:
 
     def generateCode(self,system_prompt : str,prompt_template : str, busines_requirements : BusinessRequirements):
         with self.llm_model.chat_session(system_prompt=system_prompt,prompt_template = prompt_template):
-            generarted_content = self.llm_model.generate(busines_requirements.update_requirements, max_tokens=2048)
-            print(generarted_content)
+            generarted_content = self.llm_model.generate(busines_requirements.requirements, max_tokens=2048)
+            return generarted_content
 
     def executeCommand(self):
         print("executeCommand")

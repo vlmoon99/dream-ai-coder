@@ -28,74 +28,7 @@ def main():
             TemplateStage(
             name="Create Domain Models",
             description="Create entities and relationships.",
-            prompt_template="""
-            1. Filename: user.dart
-            import 'package:json_annotation/json_annotation.dart';
-
-            part 'user.g.dart';
-
-            @JsonSerializable()
-            class User {
-                final int id;
-                final String name;
-                final String email;
-
-                User({
-                    required this.id,
-                    required this.name,
-                    required this.email,
-                });
-
-                factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
-
-                Map<String, dynamic> toJson() => _$UserToJson(this);
-            }
-            2. Filename: product.dart
-            import 'package:json_annotation/json_annotation.dart';
-
-            part 'product.g.dart';
-
-            @JsonSerializable()
-            class Product {
-                final int id;
-                final String name;
-                final double price;
-
-                Product({
-                    required this.id,
-                    required this.name,
-                    required this.price,
-                });
-
-                factory Product.fromJson(Map<String, dynamic> json) => _$ProductFromJson(json);
-
-                Map<String, dynamic> toJson() => _$ProductToJson(this);
-            }
-            3. Filename: order.dart
-            import 'package:json_annotation/json_annotation.dart';
-
-            part 'order.g.dart';
-
-            @JsonSerializable()
-            class Order {
-                final int id;
-                final int userId;
-                final List<int> productIds;
-
-                Order({
-                    required this.id,
-                    required this.userId,
-                    required this.productIds,
-                });
-
-                factory Order.fromJson(Map<String, dynamic> json) => _$OrderFromJson(json);
-
-                Map<String, dynamic> toJson() => _$OrderToJson(this);
-            }
-            """,
-            system_prompt="""
-            You are the code-generator, you generate entity models by provided templates using business requirements
-            """
+     
             ),
             TemplateStage(name="Define UI Screens", description="Define the user interface.",
             prompt_template = 
@@ -145,8 +78,9 @@ def main():
     while True:
         next_stage = project.template.get_next_stage()
         if next_stage:
-            if next_stage is not None and next_stage.system_prompt is not None and next_stage.prompt_template is not None :
-                ai_generation_service.generateCode(system_prompt= next_stage.system_prompt,prompt_template= next_stage.prompt_template,busines_requirements=project.business_requirements)
+            if next_stage is not None :
+                generation_request =  ai_generation_service.generateCode(system_prompt= next_stage.system_prompt,prompt_template= next_stage.prompt_template,busines_requirements=project.business_requirements)
+                print(generation_request)
 
             print(f"Current Stage: {next_stage.name} - {next_stage.description}")
             input("Press Enter to complete the current stage...")  # Simulate user approval
