@@ -2,12 +2,19 @@ from flask import Flask
 from flask_injector import FlaskInjector
 from injector import singleton, Binder
 from services.ai_generation_service import AIGenerationService
-from app import create_app, configure
 from flask_injector import FlaskInjector
 
 def create_app() -> Flask:
+    # Create a Flask application
     app = Flask(__name__)
+    
+    # Register blueprints for routes
+    with app.app_context():
+        from routes import bp  # Import the blueprint
+        app.register_blueprint(bp)  # Register the blueprint
+    
     return app
+
 
 def configure(binder: Binder) -> None:
     binder.bind(AIGenerationService, to=AIGenerationService, scope=singleton)
