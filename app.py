@@ -31,13 +31,38 @@ def main():
      
             ),
             TemplateStage(name="Define UI Screens", description="Define the user interface.",
-            prompt_template = 
-            """
+                        # prompt_template = 
+
+            prompt_template = r"""
+            [
+            
+                {{
+                    "system": "You are the code-generator. You generate entities by provided requirements",
+                    "user": "[{{\"data_request\":\"Create Dart class with name {class_name} and fields [{fields}], from this template --> [
+
+            import 'package:json_annotation/json_annotation.dart';
+            part '{file_name}.g.dart';
+
+            @JsonSerializable()
+            class {class_name} {{
+
+                {properties}
+
+                {constructor}
+
+                factory {class_name}.fromJson(Map<String, dynamic> json) =>
+                    _${class_name}FromJson(json);
+
+                Map<String, dynamic> toJson() => _${class_name}ToJson(this);
+
+                {copy_with}
+                
+            }}
+            ]\"}}]",
+                    "assistant": "[]",
+                }}
+            ]
             """,
-            system_prompt=
-            """
-            You are the code-generator , you generate modules,pages,vms,services,repositories,models by provided tempaltes using buinsess requirements
-            """
             ),
             TemplateStage(name="Final Testing", description="Test the application.",system_prompt= None),
         ]
