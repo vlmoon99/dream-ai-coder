@@ -1,6 +1,6 @@
 # routes.py
 
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, render_template
 from flask_injector import inject
 
 # Import your services
@@ -9,14 +9,9 @@ from services.ai_generation_service import AIGenerationService
 # Create a Blueprint for the routes
 bp = Blueprint('main', __name__)
 
-# Example route using dependency injection
 @bp.route('/')
-@inject
 def index():
-    return jsonify({
-        "message": "Welcome to the AI Coder Machine Console App!",
-        "status": "success"
-    })
+    return render_template('index.html')
 
 # Add more routes as needed
 @bp.route('/generate', methods=['GET'])
@@ -57,7 +52,7 @@ def generate_code(ai_generation_service: AIGenerationService):
                 
                 } 
             ]\ ,
-            using this business requirements -- >  Create Dart class with name : User , and fileds [id : String , createdAt : Date,updatedAt : Date, age : int,]"}}]",
+            using this business requirements -- >  Create Dart class with name : User , and fileds [id : String , createdAt : Date,updatedAt : Date, age : int,], file_name must be user_model.dart, pls take it into account"}}]",
             }}
             ],
             "assistant": ["response" : [{"file_name" : "{class_name_model}.dart","file_data":"
@@ -93,6 +88,17 @@ def generate_code(ai_generation_service: AIGenerationService):
             """
 
     
-    result = ai_generation_service.generateCode(prompt = prompt_template)
+    response = ai_generation_service.generate_code(prompt = prompt_template)
+    dart_code = ai_generation_service.extract_dart_code(response = response)
 
-    return jsonify(result)
+    print("Extracted Dart Code:\n")
+    print(dart_code)
+    file_path = "/home/mit-pc/Documents/work/deeplearning/practice/dream-ai-coder/flutter_project_for_generation/lib/models"
+    file_name = "user_model.dart"   
+    full_path = f"{file_path}/{file_name}"
+
+    with open(full_path, "w") as file:
+        file.write(dart_code)
+
+
+    return jsonify(dart_code)
