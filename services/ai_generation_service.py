@@ -24,7 +24,7 @@ class AIGenerationService:
             return "No code block found."
 
 
-    def generate_code(self,prompt : str):
+    def generate_text_from_prompt(self,prompt : str):
         with self.llm_model.chat_session():
             response = self.llm_model.generate(prompt, max_tokens=2048)
             return response
