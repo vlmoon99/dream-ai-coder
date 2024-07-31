@@ -1,6 +1,7 @@
 from gpt4all import GPT4All
 from models.business_requirements import BusinessRequirements
-import re 
+import json
+import re
 
 class AIGenerationService:
     def __init__(self):
@@ -15,6 +16,7 @@ class AIGenerationService:
         pattern = r'```\n(.*?)```'
         match = re.search(pattern, response, re.DOTALL)
         if match is None:
+                
                 pattern = r'```dart\n(.*?)```'
                 match = re.search(pattern, response, re.DOTALL)
 
@@ -22,7 +24,24 @@ class AIGenerationService:
             return match.group(1).strip()
         else:
             return "No code block found."
+        
+    def parse_generated_entities(self,response: str):
+        try:
+            # Load the initial JSON response
+            # Extract the JSON portion of the string
+            start_index = response.find('{')
+            end_index = response.rfind('}') + 1
+            json_string = response[start_index:end_index]
 
+            response_json = json.loads(json_string)
+
+            return response_json
+
+        except json.JSONDecodeError as e:
+            print(f"Error parsing JSON response: {e}")
+            return []
+
+        
 
     def generate_text_from_prompt(self,prompt : str):
         with self.llm_model.chat_session():
