@@ -1,18 +1,34 @@
-# routes.py
+import logging
 
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, jsonify, render_template, request, Response
 from flask_injector import inject
 
 
 # Import your services
 from services.ai_generation_service import AIGenerationService
+from services.video_streaming_service import VideoStreamingService
 
 # Create a Blueprint for the routes
 bp = Blueprint('main', __name__)
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+
 @bp.route('/')
 def index():
     return render_template('index.html')
+
+@bp.route('/frames')
+@inject
+def frames(video_streaming_service: VideoStreamingService):
+    try:
+        return Response(video_streaming_service.generate_frames(),
+                        mimetype='multipart/x-mixed-replace; boundary=frame')
+    except Exception as e:
+        print(f"Error in video_feed: {e}")
+        return "Error", 500
+
 
 @bp.route('/generate-structured-business-requirement', methods=['GET'])
 def generate_structured_business_requirement(ai_generation_service: AIGenerationService):
@@ -116,9 +132,6 @@ def generate_structured_business_requirement(ai_generation_service: AIGeneration
 
     # else:
     #     return jsonify({"error": "Missing 'user_input' parameter in the request body"}), 400
-
-
-
 
 @bp.route('/test-generate', methods=['GET'])
 @inject

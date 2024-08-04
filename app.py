@@ -3,6 +3,7 @@ from flask_injector import FlaskInjector
 from injector import singleton, Binder
 from services.ai_generation_service import AIGenerationService
 from flask_injector import FlaskInjector
+from services.video_streaming_service import VideoStreamingService  # Import the VideoStreamingService
 
 def create_app() -> Flask:
     app = Flask(__name__, static_folder='static', template_folder='templates')
@@ -16,6 +17,8 @@ def create_app() -> Flask:
 
 def configure(binder: Binder) -> None:
     binder.bind(AIGenerationService, to=AIGenerationService, scope=singleton)
+    binder.bind(VideoStreamingService, to=VideoStreamingService, scope=singleton)  # Corrected
+
 
 
 
