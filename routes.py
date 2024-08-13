@@ -19,15 +19,14 @@ logger = logging.getLogger(__name__)
 def index():
     return render_template('index.html')
 
-@bp.route('/frames')
-@inject
-def frames(video_streaming_service: VideoStreamingService):
-    try:
-        return Response(video_streaming_service.generate_frames(),
-                        mimetype='multipart/x-mixed-replace; boundary=frame')
-    except Exception as e:
-        print(f"Error in video_feed: {e}")
-        return "Error", 500
+@bp.route('/capture_screenshot', methods=['GET'])
+def capture_screenshot(video_service: VideoStreamingService):
+    screenshot_base64 = video_service.capture_screenshot()
+    if screenshot_base64:
+        return jsonify({'screenshot': screenshot_base64})
+    else:
+        return jsonify({'error': 'Failed to capture screenshot'}), 500
+
 
 
 @bp.route('/generate-structured-business-requirement', methods=['GET'])
