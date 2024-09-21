@@ -1,6 +1,6 @@
 // This is a generated file; do not edit or check into version control.
-FLUTTER_ROOT=/home/mit-pc/Documents/flutter
-FLUTTER_APPLICATION_PATH=/home/mit-pc/Documents/work/deeplearning/practice/dream-ai-coder/flutter_project_for_generation
+FLUTTER_ROOT=/home/vlad/fvm/versions/stable
+FLUTTER_APPLICATION_PATH=/home/vlad/work/dream-ai-coder/flutter_project_for_generation
 COCOAPODS_PARALLEL_CODE_SIGN=true
 FLUTTER_BUILD_DIR=build
 FLUTTER_BUILD_NAME=1.0.0

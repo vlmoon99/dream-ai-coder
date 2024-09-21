@@ -27,23 +27,6 @@
     </style>
 </head>
 <body>
-    <h1>Screenshot Capture</h1>
-    <button id="captureBtn">Capture Screenshot</button>
-    <img id="screenshot" alt="Screenshot will appear here" />
-
-    <script>
-        document.getElementById('captureBtn').addEventListener('click', function() {
-            fetch('/capture_screenshot')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.screenshot) {
-                        document.getElementById('screenshot').src = 'data:image/png;base64,' + data.screenshot;
-                    } else {
-                        alert('Failed to capture screenshot');
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        });
-    </script>
+    <h1>Hello wrold from Dream AI Coder</h1>
 </body>
 </html>

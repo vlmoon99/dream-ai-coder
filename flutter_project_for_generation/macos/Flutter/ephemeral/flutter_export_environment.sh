@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=/home/mit-pc/Documents/flutter"
-export "FLUTTER_APPLICATION_PATH=/home/mit-pc/Documents/work/deeplearning/practice/dream-ai-coder/flutter_project_for_generation"
+export "FLUTTER_ROOT=/home/vlad/fvm/versions/stable"
+export "FLUTTER_APPLICATION_PATH=/home/vlad/work/dream-ai-coder/flutter_project_for_generation"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=1.0.0"

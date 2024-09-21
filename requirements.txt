@@ -1,3 +1,4 @@
 gpt4all == 2.7.0
 flask_injector == 0.15.0
 selenium == 4.24.0
+pymongo == 4.9.1
