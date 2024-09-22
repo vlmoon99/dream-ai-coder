@@ -20,7 +20,7 @@ def index():
 @inject
 def create_project(project_repository: ProjectRepository):
     data = request.get_json()
-    project = ProjectModel(name=data['name']) 
+    project = ProjectModel(name=data['name'], technology=data['technology'])
     created_project = project_repository.create(project)
     return jsonify(created_project.to_dict()), 201
 

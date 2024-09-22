@@ -1,14 +1,17 @@
 from flask import Flask
 from flask_injector import FlaskInjector
 from injector import singleton, Binder
-from services.ai_generation_service import AIGenerationService
 from flask_injector import FlaskInjector
-from services.video_streaming_service import VideoStreamingService  # Import the VideoStreamingService
 
 #Import all dependencies from modules
 from modules.project_managment.repositories.project_repository import ProjectRepository
-
 from modules.project_managment.routes.project import project_routes
+
+from modules.code_generation.repositories.template_repository import TemplateRepository
+from modules.code_generation.routes.template_routes import template_routes
+
+from modules.code_generation.repositories.technology_repository import TechnologyRepository
+from modules.code_generation.routes.technology_routes import technology_routes
 
 
 def create_app() -> Flask:
@@ -16,15 +19,19 @@ def create_app() -> Flask:
 
     with app.app_context():
         app.register_blueprint(project_routes)
-    
+        app.register_blueprint(template_routes)
+        app.register_blueprint(technology_routes)
+
     return app
 
 
 def configure(binder: Binder) -> None:
-    binder.bind(AIGenerationService, to=AIGenerationService, scope=singleton)
-    binder.bind(VideoStreamingService, to=VideoStreamingService, scope=singleton)  
     binder.bind(ProjectRepository, to=ProjectRepository,
                 scope=singleton) 
+    binder.bind(TemplateRepository, to=TemplateRepository,
+                scope=singleton)
+    binder.bind(TechnologyRepository, to=TechnologyRepository,
+                scope=singleton)
 
 
 def main():
