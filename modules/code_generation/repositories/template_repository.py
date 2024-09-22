@@ -28,6 +28,13 @@ class TemplateRepository:
         data = self.collection.find_one({"_id": template_id})
         return TemplateModel.from_dict(data) if data else None
 
+    def get_template_by_tech_and_author(self, technology,author,stage):
+        """Retrieve a Template by its ID."""
+        data = self.collection.find_one(
+            {"author": author, "technology": technology, "stage": stage})
+        return TemplateModel.from_dict(data) if data else None
+
+
     def update(self, template_id, updated_template: TemplateModel):
         """Update an existing Template by its ID."""
         updated_template.updated_at = datetime.utcnow()

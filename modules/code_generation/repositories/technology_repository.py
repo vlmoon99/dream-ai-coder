@@ -26,6 +26,11 @@ class TechnologyRepository:
         data = self.collection.find_one({"_id": technology_id})
         return TechnologyModel.from_dict(data) if data else None
 
+    def get_by_technology(self, technology):
+        """Retrieve a Technology by its name."""
+        data = self.collection.find_one({"technology": technology})
+        return TechnologyModel.from_dict(data) if data else None
+
     def update(self, technology_id, updated_technology: TechnologyModel):
         """Update an existing Technology by its ID."""
         updated_technology.updated_at = datetime.utcnow()
