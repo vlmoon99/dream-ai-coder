@@ -3,10 +3,10 @@ from bson import ObjectId
 
 
 class ProjectModel:
-    def __init__(self, name,technology, created_at=None, updated_at=None, _id=None):
+    def __init__(self, name, current_stage,technology, created_at=None, updated_at=None, _id=None):
         self.id = _id if _id else str(ObjectId())
         self.name = name
-        self.current_stage = 1
+        self.current_stage = current_stage
         self.technology = technology
         self.created_at = created_at if created_at else datetime.utcnow()
         self.updated_at = updated_at if updated_at else datetime.utcnow()
