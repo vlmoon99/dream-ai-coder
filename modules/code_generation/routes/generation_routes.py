@@ -91,12 +91,19 @@ def generate_project(olama_service: OlamaService,
             template=stage_template.llm_response_template
           )
 
-          print(prompt)
+          llm_reponse = json.loads(olama_service.generate(prompt).get("response", ""))
 
-          completion = olama_service.generate(prompt)
-          response_str = completion.get("response", "")
-          response_json = json.loads(response_str)
-          print(response_json)
+          print(llm_reponse)
+
+          #! Need to check the structure of the resppnse, if structure are broken - we need to fix that structure using LLM
+
+          next_generation_task_in_current_stage = llm_reponse.get("next_generation_task",[])
+
+          if len(next_generation_task_in_current_stage) != 0 :
+            print("We have more task to generate")
+          else :
+            print("We finish generation process")
+
 
           # standard_of_saving_output = json.loads(stage_template.standard_of_saving_output)
           # standard_of_saving_output_type = parsed_data['type']
