@@ -28,9 +28,13 @@ def create_template(template_repository: TemplateRepository):
           properties:
             technology:
               type: string
+            author:
+              type: string
             stage:
               type: integer
-            template:
+            llm_response_template:
+              type: string
+            user_prompt_template:
               type: string
             example:
               type: string
@@ -46,9 +50,13 @@ def create_template(template_repository: TemplateRepository):
               type: string
             technology:
               type: string
+            author:
+              type: string
             stage:
               type: integer
-            template:
+            llm_response_template:
+              type: string
+            user_prompt_template:
               type: string
             example:
               type: string
@@ -60,8 +68,10 @@ def create_template(template_repository: TemplateRepository):
     data = request.get_json()
     template = TemplateModel(
         technology=data['technology'],
+        author=data['author'],
         stage=data['stage'],
-        template=data['template'],
+        llm_response_template=data['llm_response_template'],
+        user_prompt_template=data['user_prompt_template'],
         example=data['example'],
         description=data['description']
     )
@@ -92,9 +102,13 @@ def get_template(template_id, template_repository: TemplateRepository):
               type: string
             technology:
               type: string
+            author:
+              type: string
             stage:
               type: integer
-            template:
+            llm_response_template:
+              type: string
+            user_prompt_template:
               type: string
             example:
               type: string
@@ -130,13 +144,19 @@ def update_template(template_id, template_repository: TemplateRepository):
           properties:
             technology:
               type: string
+            author:
+              type: string
             stage:
               type: integer
-            template:
+            llm_response_template:
+              type: string
+            user_prompt_template:
               type: string
             example:
               type: string
             description:
+              type: string
+            standard_of_saving_output:  # Add this field to the Swagger docs
               type: string
     responses:
       200:
@@ -151,12 +171,24 @@ def update_template(template_id, template_repository: TemplateRepository):
     if not current_template:
         return jsonify({"error": "Template not found"}), 404
 
+
+    # template_content = (
+    #     "This is the template by which you will generate code ---> : {template} "
+    #     "This is the example of how to write response ---> : {example} "
+    #     "This is the requirements of the response ---> : It must contain a list of entities in JSON format like this one: [first_entity, second_entity, ...], "
+    #     "This is the prompt ---> : {user_prompt}"
+    # )
+
     updated_template = TemplateModel(
         _id=current_template.id,
         technology=data.get("technology", current_template.technology),
+        author=data.get("author", current_template.author),
         stage=data.get("stage", current_template.stage),
-        template=data.get("template", current_template.template),
+        llm_response_template=data.get("llm_response_template", current_template.llm_response_template),
+        user_prompt_template=data.get("user_prompt_template", current_template.user_prompt_template),
         example=data.get("example", current_template.example),
+        description=data.get("description", current_template.description),
+        standard_of_saving_output=data.get("standard_of_saving_output", current_template.standard_of_saving_output),  # Handle the new field
         created_at=current_template.created_at,
         updated_at=datetime.utcnow()
     )
