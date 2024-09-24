@@ -14,10 +14,52 @@ logger = logging.getLogger(__name__)
 @template_routes.route('/create-template', methods=['POST'])
 @inject
 def create_template(template_repository: TemplateRepository):
+    """
+    Create a new template.
+    ---
+    tags:
+      - Template
+    parameters:
+      - name: template
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            technology:
+              type: string
+            stage:
+              type: integer
+            template:
+              type: string
+            example:
+              type: string
+            description:
+              type: string
+    responses:
+      201:
+        description: Template created successfully
+        schema:
+          type: object
+          properties:
+            id:
+              type: string
+            technology:
+              type: string
+            stage:
+              type: integer
+            template:
+              type: string
+            example:
+              type: string
+            description:
+              type: string
+      400:
+        description: Invalid input
+    """
     data = request.get_json()
     template = TemplateModel(
         technology=data['technology'],
-        author=data['author'],
         stage=data['stage'],
         template=data['template'],
         example=data['example'],
@@ -30,6 +72,37 @@ def create_template(template_repository: TemplateRepository):
 @template_routes.route('/templates/<string:template_id>', methods=['GET'])
 @inject
 def get_template(template_id, template_repository: TemplateRepository):
+    """
+    Get a template by ID.
+    ---
+    tags:
+      - Template
+    parameters:
+      - name: template_id
+        in: path
+        required: true
+        type: string
+    responses:
+      200:
+        description: Template retrieved successfully
+        schema:
+          type: object
+          properties:
+            id:
+              type: string
+            technology:
+              type: string
+            stage:
+              type: integer
+            template:
+              type: string
+            example:
+              type: string
+            description:
+              type: string
+      404:
+        description: Template not found
+    """
     template = template_repository.get_by_id(template_id)
     if template:
         return jsonify(template.to_dict()), 200
@@ -39,6 +112,40 @@ def get_template(template_id, template_repository: TemplateRepository):
 @template_routes.route('/templates/<string:template_id>', methods=['PUT'])
 @inject
 def update_template(template_id, template_repository: TemplateRepository):
+    """
+    Update an existing template by ID.
+    ---
+    tags:
+      - Template
+    parameters:
+      - name: template_id
+        in: path
+        required: true
+        type: string
+      - name: template
+        in: body
+        required: false
+        schema:
+          type: object
+          properties:
+            technology:
+              type: string
+            stage:
+              type: integer
+            template:
+              type: string
+            example:
+              type: string
+            description:
+              type: string
+    responses:
+      200:
+        description: Template updated successfully
+      404:
+        description: Template not found
+      400:
+        description: Update failed
+    """
     data = request.get_json()
     current_template = template_repository.get_by_id(template_id)
     if not current_template:
@@ -63,6 +170,22 @@ def update_template(template_id, template_repository: TemplateRepository):
 @template_routes.route('/templates/<string:template_id>', methods=['DELETE'])
 @inject
 def delete_template(template_id, template_repository: TemplateRepository):
+    """
+    Delete a template by ID.
+    ---
+    tags:
+      - Template
+    parameters:
+      - name: template_id
+        in: path
+        required: true
+        type: string
+    responses:
+      200:
+        description: Template deleted successfully
+      404:
+        description: Template not found
+    """
     deleted = template_repository.delete(template_id)
     if deleted:
         return jsonify({"message": "Template deleted successfully"}), 200

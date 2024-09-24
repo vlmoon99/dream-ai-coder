@@ -14,6 +14,41 @@ logger = logging.getLogger(__name__)
 @technology_routes.route('/create-technology', methods=['POST'])
 @inject
 def create_technology(technology_repository: TechnologyRepository):
+    """
+    Create a new technology.
+    ---
+    tags:
+      - Technology
+    parameters:
+      - name: technology
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            technology:
+              type: string
+            stages:
+              type: array
+              items:
+                type: string
+    responses:
+      201:
+        description: Technology created successfully
+        schema:
+          type: object
+          properties:
+            id:
+              type: string
+            technology:
+              type: string
+            stages:
+              type: array
+              items:
+                type: string
+      400:
+        description: Invalid input
+    """
     data = request.get_json()
     technology = TechnologyModel(
         technology=data['technology'],
@@ -26,6 +61,33 @@ def create_technology(technology_repository: TechnologyRepository):
 @technology_routes.route('/technologies/<string:technology_id>', methods=['GET'])
 @inject
 def get_technology(technology_id, technology_repository: TechnologyRepository):
+    """
+    Get a technology by ID.
+    ---
+    tags:
+      - Technology
+    parameters:
+      - name: technology_id
+        in: path
+        required: true
+        type: string
+    responses:
+      200:
+        description: Technology retrieved successfully
+        schema:
+          type: object
+          properties:
+            id:
+              type: string
+            technology:
+              type: string
+            stages:
+              type: array
+              items:
+                type: string
+      404:
+        description: Technology not found
+    """
     technology = technology_repository.get_by_id(technology_id)
     if technology:
         return jsonify(technology.to_dict()), 200
@@ -35,6 +97,36 @@ def get_technology(technology_id, technology_repository: TechnologyRepository):
 @technology_routes.route('/technologies/<string:technology_id>', methods=['PUT'])
 @inject
 def update_technology(technology_id, technology_repository: TechnologyRepository):
+    """
+    Update an existing technology by ID.
+    ---
+    tags:
+      - Technology
+    parameters:
+      - name: technology_id
+        in: path
+        required: true
+        type: string
+      - name: technology
+        in: body
+        required: false
+        schema:
+          type: object
+          properties:
+            technology:
+              type: string
+            stages:
+              type: array
+              items:
+                type: string
+    responses:
+      200:
+        description: Technology updated successfully
+      404:
+        description: Technology not found
+      400:
+        description: Update failed
+    """
     data = request.get_json()
     current_technology = technology_repository.get_by_id(technology_id)
     if not current_technology:
@@ -57,6 +149,22 @@ def update_technology(technology_id, technology_repository: TechnologyRepository
 @technology_routes.route('/technologies/<string:technology_id>', methods=['DELETE'])
 @inject
 def delete_technology(technology_id, technology_repository: TechnologyRepository):
+    """
+    Delete a technology by ID.
+    ---
+    tags:
+      - Technology
+    parameters:
+      - name: technology_id
+        in: path
+        required: true
+        type: string
+    responses:
+      200:
+        description: Technology deleted successfully
+      404:
+        description: Technology not found
+    """
     deleted = technology_repository.delete(technology_id)
     if deleted:
         return jsonify({"message": "Technology deleted successfully"}), 200

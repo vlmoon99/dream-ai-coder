@@ -12,6 +12,8 @@ class OlamaService:
             f"This is the template by which you will generate code ---> : {template} "
             f"This is prompt ---> : {prompt}"
         )
+        
+        print(f"My prompt is : {prompt}")
 
         data = {
             "model": "codellama",
