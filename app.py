@@ -25,7 +25,7 @@ def create_app() -> Flask:
     # Set the logging level for pymongo to WARNING or higher
     logging.getLogger('pymongo').setLevel(logging.WARNING)
 
-    Swagger(app)
+    swagger = Swagger(app)
 
     with app.app_context():
         app.register_blueprint(project_routes)
