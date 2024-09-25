@@ -13,24 +13,6 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-def extract_keys_from_json(json_obj):
-    """
-    Recursively extract all keys from a nested dictionary structure.
-    """
-    keys = set()
-    if isinstance(json_obj, dict):
-        for key, value in json_obj.items():
-            keys.add(key)
-            if isinstance(value, dict):
-                keys.update(extract_keys_from_json(value))
-    return keys
-
-def compare_keys(template_keys, response_keys):
-    """
-    Compare the keys from the template and the response.
-    """
-    return template_keys == response_keys
-
 
 @generation_routes.route('/generate-project', methods=['POST'])
 @inject
@@ -110,36 +92,9 @@ def generate_project(olama_service: OlamaService,
             template=stage_template.llm_response_template
           )
           
-          template_keys = extract_keys_from_json(json.loads(stage_template.llm_response_template))
-
-          print(template_keys)
-
-          llm_response = None
-
-          for attempt in range(5):
-              llm_response = olama_service.generate(prompt)
-
-              print(llm_response)
-
-              response_keys = extract_keys_from_json(llm_response)
-              
-              if compare_keys(template_keys, response_keys):
-                  print(f"Valid response on attempt {attempt + 1}")
-                  break
-              else:
-                  print(f"Attempt {attempt + 1}: Invalid response structure. Expected keys: {template_keys}, but got: {response_keys}")
-
-          if llm_response is None :
-            raise Exception(f"Failed to generate valid response after {max_retries} attempts.")
-
-          next_generation_task_in_current_stage = llm_response.get("next_generation_task",[])
-
-          if len(next_generation_task_in_current_stage) != 0 :
-            print("We have more task to generate")
-            
-          else :
-            print("We finish generation process")
-
+          llm_response = olama_service.generate(prompt,stage_template.llm_response_template)
+          
+          print(llm_response)
 
           # standard_of_saving_output = json.loads(stage_template.standard_of_saving_output)
           # standard_of_saving_output_type = parsed_data['type']
