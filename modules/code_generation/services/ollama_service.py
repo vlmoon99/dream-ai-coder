@@ -1,4 +1,5 @@
 import requests
+import json
 
 class OlamaService:
     
@@ -16,7 +17,8 @@ class OlamaService:
         }
 
         response = requests.post(f"{self.base_url}/api/generate", json=data)
-        return response.json()
+
+        return json.loads(response.json().get("response", ""))
 
 
 

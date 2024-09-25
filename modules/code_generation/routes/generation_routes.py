@@ -13,6 +13,25 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
+def extract_keys_from_json(json_obj):
+    """
+    Recursively extract all keys from a nested dictionary structure.
+    """
+    keys = set()
+    if isinstance(json_obj, dict):
+        for key, value in json_obj.items():
+            keys.add(key)
+            if isinstance(value, dict):
+                keys.update(extract_keys_from_json(value))
+    return keys
+
+def compare_keys(template_keys, response_keys):
+    """
+    Compare the keys from the template and the response.
+    """
+    return template_keys == response_keys
+
+
 @generation_routes.route('/generate-project', methods=['POST'])
 @inject
 def generate_project(olama_service: OlamaService,
@@ -90,17 +109,34 @@ def generate_project(olama_service: OlamaService,
             example=stage_template.example,
             template=stage_template.llm_response_template
           )
+          
+          template_keys = extract_keys_from_json(json.loads(stage_template.llm_response_template))
 
-          llm_reponse = json.loads(olama_service.generate(prompt).get("response", ""))
+          print(template_keys)
 
-          print(llm_reponse)
+          llm_response = None
 
-          #! Need to check the structure of the resppnse, if structure are broken - we need to fix that structure using LLM
+          for attempt in range(5):
+              llm_response = olama_service.generate(prompt)
 
-          next_generation_task_in_current_stage = llm_reponse.get("next_generation_task",[])
+              print(llm_response)
+
+              response_keys = extract_keys_from_json(llm_response)
+              
+              if compare_keys(template_keys, response_keys):
+                  print(f"Valid response on attempt {attempt + 1}")
+                  break
+              else:
+                  print(f"Attempt {attempt + 1}: Invalid response structure. Expected keys: {template_keys}, but got: {response_keys}")
+
+          if llm_response is None :
+            raise Exception(f"Failed to generate valid response after {max_retries} attempts.")
+
+          next_generation_task_in_current_stage = llm_response.get("next_generation_task",[])
 
           if len(next_generation_task_in_current_stage) != 0 :
             print("We have more task to generate")
+            
           else :
             print("We finish generation process")
 
@@ -116,19 +152,3 @@ def generate_project(olama_service: OlamaService,
     except Exception as e:
         logger.error(f"Error generating completion: {str(e)}")
         return jsonify({"error": "Failed to generate project"}), 500
-
-    # try:
-        # prompt = (
-        #         f"This is the template by which you will generate code ---> : {stage_template.template} "
-        #         f"This is the example of how to write response ---> : {stage_template.example} "
-        #         f"This is the requirements of the response ---> : It must contains list of entity in json format as liek this one : [first_entity,second_entity, ...] ,"
-        #         f"If there will be a lot of data to generate you can add which entity you want to generate in new map entry with key -> continue_to_generate with value as list with entity name as user,post,task, etcs [user,post,task] ,"
-        #         f"This is prompt ---> : {user_prompt}"
-        #     )
-        # completion = olama_service.generate(prompt)
-        # response_str = completion.get("response", "")
-        # response_json = json.loads(response_str)
-    #     return jsonify({"response": response_json}), 200
-    # except Exception as e:
-    #     logger.error(f"Error generating completion: {str(e)}")
-    #     return jsonify({"error": "Failed to generate completion"}), 500
