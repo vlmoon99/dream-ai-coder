@@ -96,9 +96,15 @@ def generate_project(olama_service: OlamaService,
           
           print(llm_response)
 
-          # standard_of_saving_output = json.loads(stage_template.standard_of_saving_output)
-          # standard_of_saving_output_type = parsed_data['type']
-          # filename = parsed_data['filename']
+          standard_of_saving_output = json.loads(stage_template.standard_of_saving_output)
+          standard_of_saving_output_type = standard_of_saving_output['type']
+          if standard_of_saving_output_type is "one_file" :
+            print("Save one file inside the project")
+            filename = standard_of_saving_output['filename']
+
+          elif standard_of_saving_output is "many_files" :
+            print("Save many file inside the project")
+
 
           loop_stage+=1
         
