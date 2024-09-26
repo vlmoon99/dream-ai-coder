@@ -16,6 +16,7 @@ from modules.code_generation.routes.technology_routes import technology_routes
 
 from modules.code_generation.services.ollama_service import OlamaService
 from modules.code_generation.services.file_service import FileService
+from modules.code_generation.services.command_line_execution_service import CommandLineExecutionService
 from modules.code_generation.routes.generation_routes import generation_routes
 
 
@@ -48,6 +49,10 @@ def configure(binder: Binder) -> None:
                 scope=singleton)
     binder.bind(FileService, to=FileService,
                 scope=singleton)
+    binder.bind(CommandLineExecutionService, to=CommandLineExecutionService,
+                scope=singleton)
+
+
 
 
 def main():

@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, request
 from flask_injector import inject
 from ..services.ollama_service import OlamaService
 from ..services.file_service import FileService
+from ..services.command_line_execution_service  import CommandLineExecutionService
 
 from ..repositories.template_repository import TemplateRepository
 from ..repositories.technology_repository import TechnologyRepository
@@ -21,6 +22,7 @@ logger = logging.getLogger(__name__)
 @inject
 def generate_project(olama_service: OlamaService,
                      file_service: FileService,
+                     command_line_service : CommandLineExecutionService,
                      project_repository: ProjectRepository,
                      technology_repository: TechnologyRepository,
                      template_repository: TemplateRepository):
@@ -85,6 +87,18 @@ def generate_project(olama_service: OlamaService,
 
           stage_template = template_repository.get_template_by_tech_and_author(user_project.technology, "root", loop_stage)
 
+          stage_actions = json.loads(stage_template.actions)
+          
+          print(stage_actions)
+
+          if len(stage_actions['actions_before']) > 0 :
+            print("We have some actions before generation")
+            actions_to_execute = stage_actions['actions_before']
+
+            for action in actions_to_execute :
+              outupt = command_line_service.execute_command(action)
+              print(outupt)
+
           if stage_template is None:
               logger.error("Error generating completion: Stage template didn't found")
               return jsonify({"error": "Error generating completion: Stage template didn't found"}), 500
@@ -98,12 +112,8 @@ def generate_project(olama_service: OlamaService,
           
           llm_response = olama_service.generate(prompt,stage_template.llm_response_template)
           
-          print(llm_response)
-
           standard_of_saving_output = json.loads(stage_template.standard_of_saving_output)
           standard_of_saving_output_type = standard_of_saving_output['type']
-          print(standard_of_saving_output)
-          print(standard_of_saving_output_type)
 
           if standard_of_saving_output_type == "one_file" :
             filename = standard_of_saving_output['filename']
@@ -111,8 +121,16 @@ def generate_project(olama_service: OlamaService,
             file_service.create_folder(user_project_path)
             file_service.create_file(filename,llm_response,user_project_path)
 
-          elif standard_of_saving_output is "many_files" :
+          elif standard_of_saving_output == "many_files" :
             print("Save many file inside the project")
+
+          if len(stage_actions['actions_after']) > 0 :
+            print("We have some actions after generation")
+            actions_to_execute = stage_actions['actions_before']
+
+            for action in actions_to_execute :
+              outupt = command_line_service.execute_command(action)
+              print(outupt)
 
           loop_stage+=1
         
