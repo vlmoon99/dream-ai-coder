@@ -15,6 +15,7 @@ from modules.code_generation.repositories.technology_repository import Technolog
 from modules.code_generation.routes.technology_routes import technology_routes
 
 from modules.code_generation.services.ollama_service import OlamaService
+from modules.code_generation.services.file_service import FileService
 from modules.code_generation.routes.generation_routes import generation_routes
 
 
@@ -44,6 +45,8 @@ def configure(binder: Binder) -> None:
     binder.bind(TechnologyRepository, to=TechnologyRepository,
                 scope=singleton)
     binder.bind(OlamaService, to=OlamaService,
+                scope=singleton)
+    binder.bind(FileService, to=FileService,
                 scope=singleton)
 
 

@@ -2,10 +2,13 @@ import logging
 from flask import Blueprint, jsonify, request
 from flask_injector import inject
 from ..services.ollama_service import OlamaService
+from ..services.file_service import FileService
+
 from ..repositories.template_repository import TemplateRepository
 from ..repositories.technology_repository import TechnologyRepository
 from ...project_managment.repositories.project_repository import ProjectRepository
 import json
+import os
 
 generation_routes = Blueprint('generation', __name__)
 
@@ -17,6 +20,7 @@ logger = logging.getLogger(__name__)
 @generation_routes.route('/generate-project', methods=['POST'])
 @inject
 def generate_project(olama_service: OlamaService,
+                     file_service: FileService,
                      project_repository: ProjectRepository,
                      technology_repository: TechnologyRepository,
                      template_repository: TemplateRepository):
@@ -98,13 +102,17 @@ def generate_project(olama_service: OlamaService,
 
           standard_of_saving_output = json.loads(stage_template.standard_of_saving_output)
           standard_of_saving_output_type = standard_of_saving_output['type']
-          if standard_of_saving_output_type is "one_file" :
-            print("Save one file inside the project")
+          print(standard_of_saving_output)
+          print(standard_of_saving_output_type)
+
+          if standard_of_saving_output_type == "one_file" :
             filename = standard_of_saving_output['filename']
+            user_project_path = f"./generated_projects/{user_project.id}"
+            file_service.create_folder(user_project_path)
+            file_service.create_file(filename,llm_response,user_project_path)
 
           elif standard_of_saving_output is "many_files" :
             print("Save many file inside the project")
-
 
           loop_stage+=1
         
