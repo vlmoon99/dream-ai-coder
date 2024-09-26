@@ -23,3 +23,6 @@ var/
 
 # FVM Version Cache
 .fvm/
+
+
+generated_projects/
