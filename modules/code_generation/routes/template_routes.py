@@ -10,7 +10,6 @@ template_routes = Blueprint('template', __name__)
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-
 @template_routes.route('/create-template', methods=['POST'])
 @inject
 def create_template(template_repository: TemplateRepository):
@@ -40,6 +39,11 @@ def create_template(template_repository: TemplateRepository):
               type: string
             description:
               type: string
+            standard_of_saving_output:
+              type: string
+            actions:
+              type: string 
+
     responses:
       201:
         description: Template created successfully
@@ -62,6 +66,11 @@ def create_template(template_repository: TemplateRepository):
               type: string
             description:
               type: string
+            standard_of_saving_output:
+              type: string
+            actions:
+              type: string 
+
       400:
         description: Invalid input
     """
@@ -73,11 +82,12 @@ def create_template(template_repository: TemplateRepository):
         llm_response_template=data['llm_response_template'],
         user_prompt_template=data['user_prompt_template'],
         example=data['example'],
-        description=data['description']
+        description=data['description'],
+        standard_of_saving_output=data.get('standard_of_saving_output',""),
+        actions=data.get('actions', "")
     )
     created_template = template_repository.create(template)
     return jsonify(created_template.to_dict()), 201
-
 
 @template_routes.route('/templates/<string:template_id>', methods=['GET'])
 @inject
@@ -114,6 +124,11 @@ def get_template(template_id, template_repository: TemplateRepository):
               type: string
             description:
               type: string
+            standard_of_saving_output:
+              type: string
+            actions:
+              type: string 
+
       404:
         description: Template not found
     """
@@ -121,7 +136,6 @@ def get_template(template_id, template_repository: TemplateRepository):
     if template:
         return jsonify(template.to_dict()), 200
     return jsonify({"error": "Template not found"}), 404
-
 
 @template_routes.route('/templates/<string:template_id>', methods=['PUT'])
 @inject
@@ -156,8 +170,11 @@ def update_template(template_id, template_repository: TemplateRepository):
               type: string
             description:
               type: string
-            standard_of_saving_output:  # Add this field to the Swagger docs
+            standard_of_saving_output:
               type: string
+            actions:
+              type: string 
+
     responses:
       200:
         description: Template updated successfully
@@ -171,14 +188,6 @@ def update_template(template_id, template_repository: TemplateRepository):
     if not current_template:
         return jsonify({"error": "Template not found"}), 404
 
-
-    # template_content = (
-    #     "This is the template by which you will generate code ---> : {template} "
-    #     "This is the example of how to write response ---> : {example} "
-    #     "This is the requirements of the response ---> : It must contain a list of entities in JSON format like this one: [first_entity, second_entity, ...], "
-    #     "This is the prompt ---> : {user_prompt}"
-    # )
-
     updated_template = TemplateModel(
         _id=current_template.id,
         technology=data.get("technology", current_template.technology),
@@ -188,7 +197,8 @@ def update_template(template_id, template_repository: TemplateRepository):
         user_prompt_template=data.get("user_prompt_template", current_template.user_prompt_template),
         example=data.get("example", current_template.example),
         description=data.get("description", current_template.description),
-        standard_of_saving_output=data.get("standard_of_saving_output", current_template.standard_of_saving_output),  # Handle the new field
+        standard_of_saving_output=data.get("standard_of_saving_output", current_template.standard_of_saving_output),
+        actions=data.get("actions", current_template.actions),
         created_at=current_template.created_at,
         updated_at=datetime.utcnow()
     )
@@ -197,7 +207,6 @@ def update_template(template_id, template_repository: TemplateRepository):
     if updated:
         return jsonify({"message": "Template updated successfully"}), 200
     return jsonify({"error": "Update failed"}), 400
-
 
 @template_routes.route('/templates/<string:template_id>', methods=['DELETE'])
 @inject

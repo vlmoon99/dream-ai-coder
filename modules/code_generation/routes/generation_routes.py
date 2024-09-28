@@ -10,6 +10,7 @@ from ..repositories.technology_repository import TechnologyRepository
 from ...project_managment.repositories.project_repository import ProjectRepository
 import json
 import os
+import string
 
 generation_routes = Blueprint('generation', __name__)
 
@@ -64,11 +65,17 @@ def generate_project(olama_service: OlamaService,
     user_prompt = data.get('prompt')
     project_id = data.get('project_id')
 
+
     user_project = project_repository.get_by_id(project_id=project_id)
 
     if user_project is None:
         logger.error("Error generating completion: User project didn't found")
         return jsonify({"error": "Error generating completion: User project didn't found"}), 500
+
+    params_for_actions = {
+      "project_name": user_project.name,
+      "project_id": user_project.id
+    }
 
     project_technology = technology_repository.get_by_technology(user_project.technology)
 
@@ -96,8 +103,9 @@ def generate_project(olama_service: OlamaService,
             actions_to_execute = stage_actions['actions_before']
 
             for action in actions_to_execute :
-              outupt = command_line_service.execute_command(action)
-              print(outupt)
+              formatted_action = command_line_service.format_action(action, params_for_actions)
+              output = command_line_service.execute_command(formatted_action)
+              print(output)
 
           if stage_template is None:
               logger.error("Error generating completion: Stage template didn't found")
@@ -126,7 +134,7 @@ def generate_project(olama_service: OlamaService,
 
           if len(stage_actions['actions_after']) > 0 :
             print("We have some actions after generation")
-            actions_to_execute = stage_actions['actions_before']
+            actions_to_execute = stage_actions['actions_after']
 
             for action in actions_to_execute :
               outupt = command_line_service.execute_command(action)

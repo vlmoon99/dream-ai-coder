@@ -24,7 +24,6 @@ def create_app() -> Flask:
     app = Flask(__name__, static_folder='static', template_folder='templates')
 
 
-    # Set the logging level for pymongo to WARNING or higher
     logging.getLogger('pymongo').setLevel(logging.WARNING)
 
     swagger = Swagger(app)

@@ -1,6 +1,5 @@
 from pymongo import MongoClient
 from bson import ObjectId
-# Adjust the import path as necessary
 from ..models.template_model import TemplateModel
 from datetime import datetime
 from pymongo.server_api import ServerApi
@@ -10,7 +9,6 @@ class TemplateRepository:
     def __init__(self, uri="mongodb+srv://vlmoon:dreamaicoder@cluster0.izbgd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", db_name="app_project"):
         self.client = MongoClient(uri, server_api=ServerApi('1'))
         self.db = self.client[db_name]
-        # Adjust collection name as required
         self.collection = self.db["templates"]
         try:
             self.client.admin.command('ping')

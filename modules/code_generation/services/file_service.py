@@ -15,7 +15,7 @@ class FileService:
             OSError: If the folder cannot be created due to permission issues or other OS-level errors.
         """
         try:
-            os.makedirs(path, exist_ok=True)  # Creates the folder; no error if it already exists
+            os.makedirs(path, exist_ok=True)
             print(f"Folder created successfully at: {path}")
         except OSError as e:
             print(f"Error creating folder at {path}: {e}")

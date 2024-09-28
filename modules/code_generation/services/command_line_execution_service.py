@@ -6,6 +6,16 @@ class CommandLineExecutionService:
     def __init__(self):
         pass
 
+    def format_action(self,action, params):
+        try:
+            return action.format(**params)
+        except KeyError as e:
+            print(f"Warning: Missing parameter {e} in action: {action}")
+            return action
+        except ValueError as e:
+            print(f"Warning: Invalid format in action: {action}")
+            return action
+
     def execute_command(self, command):
         """Executes a shell command and returns the output."""
         try:
@@ -22,23 +32,3 @@ class CommandLineExecutionService:
 
         except Exception as e:
             return f"Exception occurred: {str(e)}"
-
-
-
-# if __name__ == "__main__":
-#     db_connection_string = "mongodb://localhost:27017/"  # Replace with your MongoDB connection string
-#     service = CommandLineExecutionService(db_connection_string)
-
-#     actions = {
-#         "actions_before": ["echo 'Starting...'", "ls -l"],
-#         "actions_after": ["echo 'Done!'", "cat /etc/passwd"]
-#     }
-
-#     actions_json = json.dumps(actions)
-
-#     service.save_actions(actions_json)
-
-#     outputs = service.execute_actions(actions_json)
-
-#     for output in outputs:
-#         print(f"Command: {output['command']}, Output: {output['output']}, Type: {output['type']}")
