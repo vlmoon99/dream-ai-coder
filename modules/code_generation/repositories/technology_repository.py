@@ -3,10 +3,20 @@ from bson import ObjectId
 from ..models.technology_model import TechnologyModel
 from datetime import datetime
 from pymongo.server_api import ServerApi
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class TechnologyRepository:
-    def __init__(self, uri="mongodb+srv://vlmoon:dreamaicoder@cluster0.izbgd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", db_name="app_project"):
+    def __init__(self, db_name="app_project"):
+        mongodb_user = os.getenv("MONGODB_USER")
+        mongodb_pass = os.getenv("MONGODB_PASS")
+        mongodb_url = os.getenv("MONGODB_URL")
+        
+        uri = f"mongodb+srv://{mongodb_user}:{mongodb_pass}@{mongodb_url}/?retryWrites=true&w=majority&appName=Cluster0"
+
         self.client = MongoClient(uri, server_api=ServerApi('1'))
         self.db = self.client[db_name]
         self.collection = self.db["technologies"]
