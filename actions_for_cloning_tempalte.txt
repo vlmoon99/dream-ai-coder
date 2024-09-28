@@ -1,0 +1,14 @@
+{
+    "actions_before": [
+        "git clone https://github.com/vlmoon99/dream-ai-coder-templates.git",
+        "mv dream-ai-coder-templates/flutter_template dream-ai-coder-templates/{project_name}",
+        "mkdir -p ./generated_projects/{project_id}",
+        "mv dream-ai-coder-templates/{project_name} ./generated_projects/{project_id}/",
+        "cd ./generated_projects/{project_id}/{project_name} && flutter pub get",
+        "cd ./generated_projects/{project_id}/{project_name} && flutter build web",
+	"rm -rf dream-ai-coder-templates"
+    ],
+    "actions_after": [
+        "ls -l"
+    ]
+}

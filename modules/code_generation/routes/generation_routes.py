@@ -77,6 +77,8 @@ def generate_project(olama_service: OlamaService,
       "project_id": user_project.id
     }
 
+    user_project_path = f"./generated_projects/{user_project.id}"
+
     project_technology = technology_repository.get_by_technology(user_project.technology)
 
     if project_technology is None :
@@ -96,52 +98,60 @@ def generate_project(olama_service: OlamaService,
 
           stage_actions = json.loads(stage_template.actions)
           
-          print(stage_actions)
-
           if len(stage_actions['actions_before']) > 0 :
-            print("We have some actions before generation")
             actions_to_execute = stage_actions['actions_before']
 
             for action in actions_to_execute :
               formatted_action = command_line_service.format_action(action, params_for_actions)
               output = command_line_service.execute_command(formatted_action)
-              print(output)
 
           if stage_template is None:
               logger.error("Error generating completion: Stage template didn't found")
               return jsonify({"error": "Error generating completion: Stage template didn't found"}), 500
 
+          separator = "\n---\n"
+          file_contents = []
 
+          if os.path.exists(user_project_path) and os.path.isdir(user_project_path):
+              for filename in os.listdir(user_project_path):
+                  if filename.endswith(".txt"):
+                      with open(os.path.join(user_project_path, filename), 'r') as file:
+                          file_contents.append(file.read())
+
+          context = separator.join(file_contents) if file_contents else "No context"
+
+          print(context)
+          
           prompt = stage_template.user_prompt_template.format(
-            user_prompt=user_prompt,
-            example=stage_template.example,
-            template=stage_template.llm_response_template
+              user_prompt=user_prompt,
+              example=stage_template.example,
+              template=stage_template.llm_response_template,
+              context=context
           )
-          
+
           llm_response = olama_service.generate(prompt,stage_template.llm_response_template)
-          
+          logger.info(f"LLM response {llm_response}")
+
           standard_of_saving_output = json.loads(stage_template.standard_of_saving_output)
           standard_of_saving_output_type = standard_of_saving_output['type']
 
           if standard_of_saving_output_type == "one_file" :
             filename = standard_of_saving_output['filename']
-            user_project_path = f"./generated_projects/{user_project.id}"
             file_service.create_folder(user_project_path)
             file_service.create_file(filename,llm_response,user_project_path)
 
           elif standard_of_saving_output == "many_files" :
-            print("Save many file inside the project")
+            pass
 
           if len(stage_actions['actions_after']) > 0 :
-            print("We have some actions after generation")
             actions_to_execute = stage_actions['actions_after']
 
             for action in actions_to_execute :
               outupt = command_line_service.execute_command(action)
-              print(outupt)
 
           loop_stage+=1
-        
+          logger.info(f"loop_stage {loop_stage}")
+
         return jsonify({"response": "ok"}), 200
 
     except Exception as e:

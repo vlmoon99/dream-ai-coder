@@ -12,7 +12,6 @@ class TechnologyRepository:
         self.collection = self.db["technologies"]
         try:
             self.client.admin.command('ping')
-            print("Successfully connected to MongoDB!")
         except Exception as e:
             print(e)
 

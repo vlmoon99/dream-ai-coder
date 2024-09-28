@@ -66,7 +66,6 @@ class OlamaService:
 
                 next_generation_task = llm_response.get("next_generation_task", [])
                 if next_generation_task:
-                    print("Next generation task found, generating additional data.")
                     new_prompt = f"{current_prompt} \n Focus only on generating: {next_generation_task}"
                     recursive_generation(new_prompt)
 
