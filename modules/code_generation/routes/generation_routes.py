@@ -119,8 +119,6 @@ def generate_project(olama_service: OlamaService,
                           file_contents.append(file.read())
 
           context = separator.join(file_contents) if file_contents else "No context"
-
-          print(context)
           
           prompt = stage_template.user_prompt_template.format(
               user_prompt=user_prompt,

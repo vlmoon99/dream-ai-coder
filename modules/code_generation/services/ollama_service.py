@@ -23,7 +23,7 @@ class OlamaService:
             for key, value in json_obj.items():
                 keys.add(key)
                 if isinstance(value, dict):
-                    keys.update(extract_keys_from_json(value))
+                    keys.update(self.extract_keys_from_json(value))
         return keys     
 
     def generate(self, prompt, llm_response_template):
@@ -31,6 +31,7 @@ class OlamaService:
         Generate data recursively based on a given prompt and template, ensuring that 
         the structure matches the provided template and handling next_generation_task.
         """
+
         data = {
             "model": "codestral:latest",
             "prompt": prompt,
@@ -40,23 +41,28 @@ class OlamaService:
         }
 
         generated_data = [] 
+        
         template_keys = self.extract_keys_from_json(json.loads(llm_response_template))
 
         def recursive_generation(current_prompt):
+            data['prompt'] = current_prompt
             try:
                 for attempt in range(5):
                     response = requests.post(f"{self.base_url}/api/generate", json=data).json()
                     llm_response = json.loads(response.get("response", "{}"))
 
+                    print(llm_response)
                     response_keys = self.extract_keys_from_json(llm_response)
-
+                    
                     if self.compare_keys(template_keys, response_keys):
                         print(f"Valid response on attempt {attempt + 1}")
                         break
                     else:
                         print(f"Attempt {attempt + 1}: Invalid response structure. Expected keys: {template_keys}, but got: {response_keys}")
+                        data['prompt'] =  f"Attempt {attempt + 1}: Invalid response structure. Expected keys: {template_keys}, but got: {response_keys}" + ", Regenerate data using this prompt :" + prompt
                 else:
                     raise Exception(f"Failed to generate a valid response after 5 attempts.")
+
 
                 data_chunk = llm_response.get("generated_data", [])
                 if data_chunk:
@@ -64,9 +70,10 @@ class OlamaService:
                 else:
                     raise Exception("No generated data found in the LLM response.")
 
+
                 next_generation_task = llm_response.get("next_generation_task", [])
                 if next_generation_task:
-                    new_prompt = f"{current_prompt} \n Focus only on generating: {next_generation_task}"
+                    new_prompt = f"{prompt} \n Focus only on generating: {next_generation_task} , didn't repeat generated_data : {generated_data}"
                     recursive_generation(new_prompt)
 
             except Exception as e:
