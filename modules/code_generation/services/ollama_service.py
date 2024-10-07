@@ -14,17 +14,23 @@ class OlamaService:
         return template_keys == response_keys
 
 
-    def extract_keys_from_json(self,json_obj):
+    def extract_keys_from_json(self, json_obj):
         """
         Recursively extract all keys from a nested dictionary structure.
+        If 'next_generation_task' is not in the final set of keys, add it.
         """
         keys = set()
+
         if isinstance(json_obj, dict):
             for key, value in json_obj.items():
                 keys.add(key)
                 if isinstance(value, dict):
                     keys.update(self.extract_keys_from_json(value))
-        return keys     
+
+        if 'next_generation_task' not in keys and 'generated_data' in keys:
+            keys.add('next_generation_task')
+
+        return keys
 
     def generate(self, prompt, llm_response_template):
         """
