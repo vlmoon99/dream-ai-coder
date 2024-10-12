@@ -11,7 +11,7 @@ class OlamaService:
         """
         Compare the keys from the template and the response.
         """
-        return template_keys == response_keys
+        return list(template_keys)[:2] == list(response_keys)[:2]
 
 
     def extract_keys_from_json(self, json_obj):
@@ -47,9 +47,8 @@ class OlamaService:
         }
 
         generated_data = [] 
-        
-        template_keys = self.extract_keys_from_json(json.loads(llm_response_template))
 
+        template_keys = self.extract_keys_from_json(json.loads(llm_response_template))
         def recursive_generation(current_prompt):
             data['prompt'] = current_prompt
             try:
@@ -83,7 +82,9 @@ class OlamaService:
                     recursive_generation(new_prompt)
 
             except Exception as e:
+                print(e.args)
                 raise Exception(f"Error generating completion: {str(e)}")
+
 
         recursive_generation(prompt)
 

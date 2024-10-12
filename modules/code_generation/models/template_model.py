@@ -2,11 +2,12 @@ from datetime import datetime
 from bson import ObjectId
 
 class TemplateModel:
-    def __init__(self, author, technology, description, stage, llm_response_template, user_prompt_template, example, standard_of_saving_output,actions, created_at=None, updated_at=None, _id=None):
+    def __init__(self, author, technology, description, stage, context, llm_response_template, user_prompt_template, example, standard_of_saving_output,actions, created_at=None, updated_at=None, _id=None):
         self.id = _id if _id else str(ObjectId())
         self.technology = technology 
         self.author = author
-        self.stage = stage  
+        self.stage = stage
+        self.context = context
         self.llm_response_template = llm_response_template 
         self.user_prompt_template = user_prompt_template
         self.example = example
@@ -22,6 +23,7 @@ class TemplateModel:
             "technology": self.technology,
             "author": self.author,
             "stage": self.stage,
+            "context" : self.context,
             "llm_response_template": self.llm_response_template,
             "user_prompt_template": self.user_prompt_template,
             "example": self.example,
@@ -43,6 +45,7 @@ class TemplateModel:
             technology=data.get("technology", None),
             author=data.get("author", None),
             stage=data.get("stage", None),
+            context=data.get("context", None),
             llm_response_template=data.get("llm_response_template", None),
             user_prompt_template=data.get("user_prompt_template", None),
             example=data.get("example", None),
