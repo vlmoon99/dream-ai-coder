@@ -95,8 +95,17 @@ def generate_project(olama_service: OlamaService,
           logger.info(f"Start generate process of stage {loop_stage}")
 
           stage_template = template_repository.get_template_by_tech_and_author(user_project.technology, "root", loop_stage)
+          
+          standard_of_saving_output = json.loads(stage_template.standard_of_saving_output)
+          standard_of_saving_output_type = standard_of_saving_output['type']
 
-          stage_actions = json.loads(stage_template.actions)
+
+          stage_actions = {"actions_before" : [], "actions_after" : [] }
+          if isinstance(stage_template.actions, str):
+              stage_actions = json.loads(stage_template.actions)
+          else:
+              stage_actions = stage_template.actions
+
           
           if len(stage_actions['actions_before']) > 0 :
             actions_to_execute = stage_actions['actions_before']
@@ -109,37 +118,63 @@ def generate_project(olama_service: OlamaService,
               logger.error("Error generating completion: Stage template didn't found")
               return jsonify({"error": "Error generating completion: Stage template didn't found"}), 500
 
-          separator = "\n---\n"
           file_contents = []
+          context = ''
+          if stage_template.context is not None :
+            filenames = json.loads(stage_template.context)
 
-          if os.path.exists(user_project_path) and os.path.isdir(user_project_path):
-              for filename in os.listdir(user_project_path):
-                  if filename.endswith(".txt"):
-                      with open(os.path.join(user_project_path, filename), 'r') as file:
-                          file_contents.append(file.read())
+            separator = "\n---\n"
+            file_contents = []
+            
+            if os.path.exists(user_project_path) and os.path.isdir(user_project_path):
+                for filename in filenames:
+                  with open(os.path.join(user_project_path, filename), 'r') as file:
+                    file_contents.append(file.read())
 
           context = separator.join(file_contents) if file_contents else "No context"
           
-          prompt = stage_template.user_prompt_template.format(
+          llm_response = []
+
+
+          if standard_of_saving_output_type == "many_files" :
+            context_files = json.loads(stage_template.context)
+            filename = context_files[0]
+            parsed_structure = []
+            
+            with open(os.path.join(user_project_path, filename), 'r') as file:
+              parsed_structure = json.loads(file.read())
+
+            print(f"parsed_structure {parsed_structure}")
+            
+            for entry in parsed_structure :
+              prompt = stage_template.user_prompt_template.format(
+              user_prompt="Generate me data by provided template using provided data in the context",
+              example=stage_template.example,
+              template=stage_template.llm_response_template,
+              context=entry)
+              response = olama_service.generate(prompt,stage_template.llm_response_template)
+              llm_response.append(response[0])
+
+          elif standard_of_saving_output_type == "one_file" :
+            prompt = stage_template.user_prompt_template.format(
               user_prompt=user_prompt,
               example=stage_template.example,
               template=stage_template.llm_response_template,
-              context=context
-          )
+              context=context)
+            llm_response = olama_service.generate(prompt,stage_template.llm_response_template)
 
-          llm_response = olama_service.generate(prompt,stage_template.llm_response_template)
-          logger.info(f"LLM response {llm_response}")
-
-          standard_of_saving_output = json.loads(stage_template.standard_of_saving_output)
-          standard_of_saving_output_type = standard_of_saving_output['type']
 
           if standard_of_saving_output_type == "one_file" :
             filename = standard_of_saving_output['filename']
             file_service.create_folder(user_project_path)
-            file_service.create_file(filename,llm_response,user_project_path)
+            encoded_response = json.dumps(llm_response, ensure_ascii=False)
+            file_service.create_file(filename,encoded_response,user_project_path)
 
-          elif standard_of_saving_output == "many_files" :
-            pass
+          elif standard_of_saving_output_type == "many_files" :
+            template = standard_of_saving_output['filename']
+            print(f"TEMPLATE ::: {template}")
+            print(f"llm_response ::: {llm_response}")
+
 
           if len(stage_actions['actions_after']) > 0 :
             actions_to_execute = stage_actions['actions_after']
@@ -148,7 +183,6 @@ def generate_project(olama_service: OlamaService,
               outupt = command_line_service.execute_command(action)
 
           loop_stage+=1
-          logger.info(f"loop_stage {loop_stage}")
 
         return jsonify({"response": "ok"}), 200
 
