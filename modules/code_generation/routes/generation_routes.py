@@ -77,7 +77,8 @@ def generate_project(olama_service: OlamaService,
       "project_id": user_project.id
     }
 
-    user_project_path = f"./generated_projects/{user_project.id}"
+    user_project_path = f"./generated_projects/{user_project.id}/"
+    user_project_app_path = f"./generated_projects/{user_project.id}/{user_project.name}/"
 
     project_technology = technology_repository.get_by_technology(user_project.technology)
 
@@ -172,14 +173,22 @@ def generate_project(olama_service: OlamaService,
 
           elif standard_of_saving_output_type == "many_files" :
             template = standard_of_saving_output['filename']
+
             print(f"TEMPLATE ::: {template}")
             print(f"llm_response ::: {llm_response}")
+          
+            for response in llm_response :
+              filename = response['filename']
+              content = response['content']
+              file_service.create_folder(user_project_app_path)
+              file_service.create_file(filename,content,f"{user_project_app_path}{user_project.project_folder}")
 
 
           if len(stage_actions['actions_after']) > 0 :
             actions_to_execute = stage_actions['actions_after']
 
             for action in actions_to_execute :
+              print(action)
               outupt = command_line_service.execute_command(action)
 
           loop_stage+=1
