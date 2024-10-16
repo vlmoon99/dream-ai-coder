@@ -2,7 +2,7 @@ from datetime import datetime
 from bson import ObjectId
 
 class TemplateModel:
-    def __init__(self, author, technology, description, stage, context, llm_response_template, user_prompt_template, example, standard_of_saving_output,actions, created_at=None, updated_at=None, _id=None):
+    def __init__(self, author, technology, description, stage, context, llm_response_template, user_prompt_template, example, standard_of_saving_output,actions, project_folder , created_at=None, updated_at=None, _id=None):
         self.id = _id if _id else str(ObjectId())
         self.technology = technology 
         self.author = author
@@ -16,6 +16,7 @@ class TemplateModel:
         self.actions = actions
         self.created_at = created_at if created_at else datetime.utcnow()
         self.updated_at = updated_at if updated_at else datetime.utcnow()
+        self.project_folder = project_folder
 
     def to_dict(self, include_id=True):
         """Convert the TemplateModel to a dictionary format for MongoDB."""
@@ -30,6 +31,7 @@ class TemplateModel:
             "description": self.description,
             "standard_of_saving_output": self.standard_of_saving_output,
             "actions" : self.actions,
+            "project_folder" : self.project_folder,
             "createdAt": self.created_at,
             "updatedAt": self.updated_at
         }
@@ -52,6 +54,7 @@ class TemplateModel:
             description=data.get("description", None),
             standard_of_saving_output=data.get("standard_of_saving_output", None),
             actions=data.get("actions", None),
+            project_folder=data.get("project_folder",None),
             created_at=data.get("createdAt", None),
             updated_at=data.get("updatedAt", None)
         )

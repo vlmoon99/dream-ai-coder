@@ -3,7 +3,7 @@ from bson import ObjectId
 
 
 class ProjectModel:
-    def __init__(self, name, current_stage,technology,generated_files,project_folder, created_at=None, updated_at=None, _id=None):
+    def __init__(self, name, current_stage,technology,generated_files, created_at=None, updated_at=None, _id=None):
         self.id = _id if _id else str(ObjectId())
         self.name = name
         self.current_stage = current_stage
@@ -11,7 +11,6 @@ class ProjectModel:
         self.generated_files = generated_files
         self.created_at = created_at if created_at else datetime.utcnow()
         self.updated_at = updated_at if updated_at else datetime.utcnow()
-        self.project_folder = project_folder
 
     def to_dict(self, include_id=True):
         """Convert the ProjectModel to a dictionary format for MongoDB."""
@@ -22,7 +21,6 @@ class ProjectModel:
             "generated_files": self.generated_files,
             "createdAt": self.created_at,
             "updatedAt": self.updated_at,
-            "project_folder" : self.project_folder
         }
         if include_id:
             data["_id"] = self.id 
@@ -39,5 +37,4 @@ class ProjectModel:
             generated_files=data.get("generated_files", None),
             created_at=data.get("createdAt", None), 
             updated_at=data.get("updatedAt", None),
-            project_folder=data.get("project_folder", None)
         )

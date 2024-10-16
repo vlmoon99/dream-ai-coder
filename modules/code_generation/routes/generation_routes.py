@@ -19,6 +19,35 @@ logger = logging.getLogger(__name__)
 
 
 
+def get_context_for_one_file_generation(stage_template, user_project_path, command_line_service, params_for_actions, separator):
+    file_contents = []
+    context = ''
+    if stage_template.context is not None :
+      filenames = json.loads(stage_template.context)
+    
+      separator = "\n---\n"
+      file_contents = []
+    
+      if os.path.exists(user_project_path) and os.path.isdir(user_project_path):
+          for filename in filenames:
+    
+            if len(filename.split("/")) > 1 :
+              if filename.endswith("*") :
+                formatted_filename_path = command_line_service.format_action(filename, params_for_actions)
+                print("FormatedPath")
+                print(formatted_filename_path)
+                with open(os.path.join(user_project_path, formatted_filename_path), 'r') as file:
+                  file_contents.append(file.read())
+    
+            else :
+              with open(os.path.join(user_project_path, filename), 'r') as file:
+                file_contents.append(file.read())
+    
+    context = separator.join(file_contents) if file_contents else "No context"
+    
+    return context
+
+
 @generation_routes.route('/generate-project', methods=['POST'])
 @inject
 def generate_project(olama_service: OlamaService,
@@ -112,28 +141,13 @@ def generate_project(olama_service: OlamaService,
             actions_to_execute = stage_actions['actions_before']
 
             for action in actions_to_execute :
-              formatted_action = command_line_service.format_action(action, params_for_actions)
-              output = command_line_service.execute_command(formatted_action)
+              formatted_action_before = command_line_service.format_action(action, params_for_actions)
+              output = command_line_service.execute_command(formatted_action_before)
 
           if stage_template is None:
               logger.error("Error generating completion: Stage template didn't found")
               return jsonify({"error": "Error generating completion: Stage template didn't found"}), 500
 
-          file_contents = []
-          context = ''
-          if stage_template.context is not None :
-            filenames = json.loads(stage_template.context)
-
-            separator = "\n---\n"
-            file_contents = []
-            
-            if os.path.exists(user_project_path) and os.path.isdir(user_project_path):
-                for filename in filenames:
-                  with open(os.path.join(user_project_path, filename), 'r') as file:
-                    file_contents.append(file.read())
-
-          context = separator.join(file_contents) if file_contents else "No context"
-          
           llm_response = []
 
 
@@ -157,6 +171,8 @@ def generate_project(olama_service: OlamaService,
               llm_response.append(response[0])
 
           elif standard_of_saving_output_type == "one_file" :
+            context = get_context_for_one_file_generation(stage_template, user_project_path, command_line_service, params_for_actions, separator)
+
             prompt = stage_template.user_prompt_template.format(
               user_prompt=user_prompt,
               example=stage_template.example,
@@ -180,16 +196,20 @@ def generate_project(olama_service: OlamaService,
             for response in llm_response :
               filename = response['filename']
               content = response['content']
-              file_service.create_folder(user_project_app_path)
-              file_service.create_file(filename,content,f"{user_project_app_path}{user_project.project_folder}")
+              formatted_stage_path = command_line_service.format_action(stage_template.project_folder, params_for_actions)
+              full_path = f"{user_project_path}{formatted_stage_path}"
+              file_service.create_folder(full_path)
+              file_service.create_file(filename,content,full_path)
 
 
           if len(stage_actions['actions_after']) > 0 :
             actions_to_execute = stage_actions['actions_after']
 
             for action in actions_to_execute :
-              print(action)
-              outupt = command_line_service.execute_command(action)
+              formatted_action_after = command_line_service.format_action(action, params_for_actions)
+              print(formatted_action_after)
+              output = command_line_service.execute_command(formatted_action_after)
+
 
           loop_stage+=1
 
