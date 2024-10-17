@@ -158,44 +158,23 @@ def generate_project(olama_service: OlamaService,
 
             filename = context_files[0]
             parsed_structure = []
-            
-            additional_context_files = context_files[:1]
-            expanded_files = []
-            for file in additional_context_files:
-                if '*' in file:
-                    for expanded_file in glob.glob(file):
-                        try:
-                            with open(expanded_file, 'r') as f:
-                                content = f.read()
-                                expanded_files.append(f"Path: {expanded_file}\nContent:\n{content}\n")
-                        except Exception as e:
-                            print(f"Error reading file {expanded_file}: {e}")
-                else:
-                    try:
-                        with open(file, 'r') as f:
-                            content = f.read()
-                            expanded_files.append(f"Path: {file}\nContent:\n{content}\n")
-                    except Exception as e:
-                        print(f"Error reading file {file}: {e}")
 
-            concatenated_context = '\n'.join(expanded_files)
-
-            print(f"Structured Concatenated Context:\n{concatenated_context}")
-
-            
             with open(os.path.join(user_project_path, filename), 'r') as file:
               parsed_structure = json.loads(file.read())
 
             print(f"parsed_structure {parsed_structure}")
             
-            for entry in parsed_structure :
-              prompt = stage_template.user_prompt_template.format(
-              user_prompt="Generate me data by provided template using provided data in the context",
-              example=stage_template.example,
-              template=stage_template.llm_response_template,
-              context=entry)
-              response = olama_service.generate(prompt,stage_template.llm_response_template)
-              llm_response.append(response[0])
+            for index, entry in enumerate(parsed_structure):
+                print(f"Index: {index}, Entry: {entry}")
+                
+                prompt = stage_template.user_prompt_template.format(
+                user_prompt="Generate me data by provided template using provided data in the context",
+                example=stage_template.example,
+                template=stage_template.llm_response_template,
+                context=entry)
+
+                response = olama_service.generate(prompt,stage_template.llm_response_template)
+                llm_response.extend(response)
 
           elif standard_of_saving_output_type == "one_file" :
             context = get_context_for_one_file_generation(stage_template, user_project_path, command_line_service, params_for_actions)
